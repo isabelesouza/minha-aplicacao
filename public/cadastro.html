@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!--Aluna Isabele Silva Souza Monteiro / Matrícula: 2222868-->
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Cadastro</h2>
+        <form id="cadastroForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">Nome de Usuário:</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">E-mail:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Senha:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-success">Cadastrar</button>
+        </form>
+        
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.getElementById('cadastroForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+    
+    
+            axios.post('http://192.168.0.8:3000/cadastro', { username, email, password })
+                .then(response => {
+                    // Processar a resposta do backend, exibir mensagens, redirecionar, etc.
+                    console.log(response.data); 
+                    alert('Cadastro realizado com sucesso! Você será redirecionado para o login.');
+                    window.location.href = 'http://192.168.0.8:3000/login'; // Redirecionar para a página de login
+                })
+                .catch(error => {
+                    // Lidar com erros de cadastro, exibir mensagens de erro, etc.
+                    console.error(error);
+                });
+        });
+    </script>
+  
+</body>
+</html>

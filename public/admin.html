@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<!--Aluna Isabele Silva Souza Monteiro / Matrícula: 2222868-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Administrativa</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2>Página Administrativa</h2>
+
+        <!-- Tabela de usuários -->
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Email</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="userList"></tbody>
+        </table>
+
+        <!-- Formulário de edição -->
+        <div id="editUserForm" style="display:none;">
+            <h5 class="mb-3">Editar Usuário</h5>
+            <form>
+                <div class="form-group">
+                    <label for="editUsername">Novo Nome de Usuário:</label>
+                    <input type="text" id="editUsername" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Novo Email:</label>
+                    <input type="email" id="editEmail" class="form-control">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="saveChanges()">Salvar Mudanças</button>
+                <button type="button" class="btn btn-secondary ml-2" onclick="cancelEdit()">Cancelar</button>
+            </form>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+        <script>
+            async function loadUsers() {
+                const response = await axios.get('http://192.168.0.8:3000/admin/users');
+                const userList = document.getElementById('userList');
+
+                userList.innerHTML = '';
+
+                response.data.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>
+                            <button class="btn btn-info" onclick="startEdit('${user._id}')">Editar</button>
+                            <button class="btn btn-danger ml-2" onclick="deleteUser('${user._id}')">Excluir</button>
+                        </td>
+                    `;
+
+                    userList.appendChild(row);
+                });
+            }
+
+            function startEdit(userId) {
+                const user = getUserById(userId);
+
+                document.getElementById('editUsername').value = user.username;
+                document.getElementById('editEmail').value = user.email;
+
+                document.getElementById('userList').style.display = 'none';
+                document.getElementById('editUserForm').style.display = 'block';
+
+                document.getElementById('editUserForm').dataset.userId = user._id;
+            }
+
+            async function saveChanges() {
+                const userId = document.getElementById('editUserForm').dataset.userId;
+                const updatedUser = {
+                    username: document.getElementById('editUsername').value,
+                    email: document.getElementById('editEmail').value
+                };
+
+                try {
+                    await axios.put(`http://192.168.0.8:3000/admin/editar-usuario/${userId}`, updatedUser);
+                    alert('Usuário editado com sucesso!');
+                    loadUsers();
+                    cancelEdit();
+                } catch (error) {
+                    console.error(error);
+                    alert('Erro ao editar usuário.');
+                }
+            }
+
+            function cancelEdit() {
+                document.getElementById('editUsername').value = '';
+                document.getElementById('editEmail').value = '';
+
+                document.getElementById('editUserForm').style.display = 'none';
+                document.getElementById('userList').style.display = 'table'; // Alteração aqui
+            }
+
+            async function deleteUser(userId) {
+                const confirmation = confirm('Tem certeza que deseja excluir este usuário?');
+
+                if (confirmation) {
+                    try {
+                        await axios.delete(`http://192.168.0.8:3000/admin/excluir-usuario/${userId}`);
+                        alert('Usuário excluído com sucesso!');
+                        loadUsers();
+                    } catch (error) {
+                        console.error(error);
+                        alert('Erro ao excluir usuário.');
+                    }
+                }
+            }
+
+            function getUserById(userId) {
+                return {
+                    _id: userId,
+                    username: 'Usuário Exemplo',
+                    email: 'exemplo@email.com'
+                };
+            }
+
+            loadUsers();
+        </script>
+    </div>
+</body>
+
+</html>
